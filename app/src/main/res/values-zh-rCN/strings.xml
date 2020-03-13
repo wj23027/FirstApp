@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">贺卡</string>
     <string name="one">图片</string>
-    <string name="happy_birthday">生日快乐</string>
+    <string name="happy_birthday">生日快乐呀！!</string>
     <string name="name">李华</string>
+    <string name="name2">花花:</string>
 </resources>

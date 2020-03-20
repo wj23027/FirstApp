@@ -5,4 +5,9 @@
     <string name="happy_birthday">生日快乐呀！!</string>
     <string name="name">李华</string>
     <string name="name2">花花:</string>
+    <string name="inputTemp">请输入摄氏度</string>
+    <string name="result">结果为：</string>
+    <string name="btnToF">转换为华氏度</string>
+    <string name="tempC">℃</string>
+    <string name="tempF">℉</string>
 </resources>

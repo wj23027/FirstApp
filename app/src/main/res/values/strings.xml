@@ -10,6 +10,11 @@
     <string name="second_fragment_label" translatable="false">second_fragment_label</string>
     <string name="previous" translatable="false">Previous</string>
     <string name="name2">Dear Huahua:</string>
+    <string name="result">result:</string>
+    <string name="btnToF">"Celsius to Fahrenheit "</string>
+    <string name="inputTemp">Enter the temperature</string>
+    <string name="tempC">℃</string>
+    <string name="tempF">℉</string>
 
     \
 

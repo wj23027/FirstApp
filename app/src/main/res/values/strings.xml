@@ -15,6 +15,11 @@
     <string name="inputTemp">Enter the temperature</string>
     <string name="tempC">℃</string>
     <string name="tempF">℉</string>
+    <string name="btn_dollar">Dollar</string>
+    <string name="hing_rmb">input rmb</string>
+    <string name="btn_euro">Euro</string>
+    <string name="btn_won">Won</string>
+
 
     \
 

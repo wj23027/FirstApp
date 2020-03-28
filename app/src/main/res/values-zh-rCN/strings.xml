@@ -10,4 +10,8 @@
     <string name="btnToF">转换为华氏度</string>
     <string name="tempC">℃</string>
     <string name="tempF">℉</string>
+    <string name="btn_dollar">美元</string>
+    <string name="hing_rmb">请输入人民币</string>
+    <string name="btn_euro">欧元</string>
+    <string name="btn_won">韩元</string>
 </resources>

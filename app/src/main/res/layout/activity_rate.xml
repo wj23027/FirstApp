@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:padding="30dp"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".RateActivity">
+
+    <EditText
+        android:id="@+id/rmb"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:hint="@string/hing_rmb"
+        android:inputType="numberDecimal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+
+        android:gravity="center" android:id="@+id/showOut"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="35sp" />
+    <Button
+        android:id="@+id/btn_dollar"
+        android:onClick="calculate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_dollar" />
+
+    <Button
+        android:id="@+id/btn_euro"
+        android:onClick="calculate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_euro" />
+
+    <Button
+        android:id="@+id/btn_won"
+        android:onClick="calculate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_won" />
+    <Button
+        android:id="@+id/trans"
+        android:onClick="openOther"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btnToF" />
+
+
+
+
+
+</LinearLayout>

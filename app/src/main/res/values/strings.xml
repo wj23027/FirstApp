@@ -19,6 +19,8 @@
     <string name="hing_rmb">input rmb</string>
     <string name="btn_euro">Euro</string>
     <string name="btn_won">Won</string>
+    <string name="btn_open">config</string>
+    <string name="btn_sava">sava</string>
 
 
     \

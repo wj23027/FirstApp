@@ -14,4 +14,6 @@
     <string name="hing_rmb">请输入人民币</string>
     <string name="btn_euro">欧元</string>
     <string name="btn_won">韩元</string>
+    <string name="btn_open">调试</string>
+    <string name="btn_sava">保存</string>
 </resources>

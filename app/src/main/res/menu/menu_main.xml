@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.swufe.firstapp.MainActivity">
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title=""
-        app:showAsAction="never" />
+        android:id="@+id/menu_set"
+        android:icon="@mipmap/settings"
+        android:title="@string/action_settings"
+        app:showAsAction="always" />
+
 </menu>

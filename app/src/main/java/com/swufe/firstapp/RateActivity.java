@@ -21,14 +21,15 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 public class RateActivity extends AppCompatActivity implements Runnable {
     public final String TAG = "RateActivity";
@@ -66,15 +67,21 @@ public class RateActivity extends AppCompatActivity implements Runnable {
             @Override
             public void handleMessage(@NonNull Message msg) {//获得数据队列
                 if(msg.what == 5){//判断数据是哪个线程返回的
-                    String str = (String) msg.obj;
-                    Log.i(TAG,"handMessage msg = " +str);
-                    show.setText(str);
+                    Bundle bundle = (Bundle) msg.obj;
+                    dollarRate = bundle.getFloat("dollar-rate");
+                    euroRate = bundle.getFloat("euro-rate");
+                    wonRate = bundle.getFloat("won-rate");
+                    Log.i(TAG,"网页中的dollar:"+dollarRate);
+                    Log.i(TAG,"网页中的euro:"+euroRate);
+                    Log.i(TAG,"网页中的won:"+wonRate);
+                    Toast.makeText(RateActivity.this,"汇率已更新",Toast.LENGTH_SHORT).show();
                 }
                 super.handleMessage(msg);
             }
         };
 
     }
+
 
     @Override//创建菜单
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -163,49 +170,97 @@ public class RateActivity extends AppCompatActivity implements Runnable {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override//多线程
     public void run() {
+        Bundle bundle = new Bundle();//用于保存获取的汇率
 
-        Log.i(TAG,"runrun");
-        for (int i = 1;i<6;i++) {
-            Log.i(TAG, "run:i=" + i);
-            //当期停止两秒钟
+//        Log.i(TAG,"runrun");
+//        for (int i = 1;i<6;i++) {
+//            Log.i(TAG, "run:i=" + i);
+//            //当期停止两秒钟
+//            try {
+//                Thread.sleep(2000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
+
+//            //获取Msg对象，用于返回主线程
+//            Message msg = handler.obtainMessage(5);//标识what用于massage
+//            //msg.what = 5;
+//            msg.obj = "Hellow from run()";//编辑msg内容
+//            handler.sendMessage(msg);//将msg发送至消息队列
+
+        //获得网络数据
+        Document doc = null;
+        try {
+            doc = Jsoup.connect("http://www.usd-cny.com/bankofchina.htm").get();//从网页中获得doc对象
+            Log.i(TAG,"title:"+ doc.title());//获得body的title
+            Elements tables = doc.getElementsByTag("table");//在Document dot中获取所有table内的内容
+            Element table = tables.get(0);
+            //Log.i(TAG,"table="+table);
+            //在Element table获取td中的数据
+            Elements tds = table.getElementsByTag("td");
+            for(int i = 0;i<tds.size();i+=6){
+                String text = tds.get(i).text();
+                String value = tds.get(i + 5).text();
+                //Log.i(TAG, text+"===>"+ value);
+                if("美元".equals(text)){
+                    Log.i(TAG, text+"===>"+ 100f/Float.parseFloat(value));
+                    bundle.putFloat("dollar-rate",100f/Float.parseFloat(value));
+                }else if("欧元".equals(text)){
+                    Log.i(TAG, text+"===>"+ 100f/Float.parseFloat(value));
+                    bundle.putFloat("euro-rate",100f/Float.parseFloat(value));
+                }if("韩元".equals(text)){
+                    Log.i(TAG, text+"===>"+ 100f/Float.parseFloat(value));
+                    bundle.putFloat("won-rate",100f/Float.parseFloat(value));
+                }
+
+            }
+        }catch (IOException e) {
+            e.printStackTrace();
+            }
+        //bundle中通过massage保存数据
+        //获取Msg对象，用于返回主线程
+        while(true){
             try {
-                Thread.sleep(2000);
+                Thread.sleep(2000);//使用sleep(long)方法定时刷新
+                Message msg = handler.obtainMessage(5);//标识what用于massage
+                //msg.what = 5;
+                msg.obj = bundle;//编辑msg内容
+                handler.sendMessage(msg);//将msg发送至消息队列
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         }
 
-            //获取Msg对象，用于返回主线程
-            Message msg = handler.obtainMessage(5);//标识what用于massage
-            //msg.what = 5;
-            msg.obj = "Hellow from run()";//编辑msg内容
-            handler.sendMessage(msg);//将msg发送至消息队列
 
-        //获得网络数据
-        URL url = null;
-        try {
-            url = new URL("http://www.usd-cny.com/icbc.htm");
-            //利用HttpURLConnection打开远程链接
-            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-            InputStream inputStream = http.getInputStream();//获得页面的输入流
-            String html = inputStringToString(inputStream);//解析数据流中的文本（从inputStream转为String
-            Log.i(TAG,"run:html="+html);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+
+//        URL url = null;
+//        try {
+//            Log.i(TAG,"run:html=");
+//            url = new URL("http://www.usd-cny.com/bankofchina.htm");
+//            //利用HttpURLConnection打开远程链接
+//            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+//            InputStream inputStream = http.getInputStream();//获得页面的输入流
+//            String html = inputStringToString(inputStream);//解析数据流中的文本（从inputStream转为String
+//            Log.i(TAG,"run:html="+html);
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
 
     }
 
-    //将输入流转化为字符串
+    //将输入流转化为字符串(可到网上查找方法）
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private String inputStringToString(InputStream inputStream) throws IOException {
         final int bufferSize = 1024;
         final char[] buffer = new char[bufferSize];
         final StringBuilder out = new StringBuilder();
-        Reader in = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        Reader in = new InputStreamReader(inputStream, "gb2312");
         for(; ; ){
             int rsz = in.read(buffer,0,buffer.length);
             if(rsz < 0)

@@ -222,7 +222,7 @@ public class RateActivity extends AppCompatActivity implements Runnable {
         //获取Msg对象，用于返回主线程
         while(true){
             try {
-                Thread.sleep(2000);//使用sleep(long)方法定时刷新
+                Thread.sleep(86400000);//使用sleep(long)方法定时刷新
                 Message msg = handler.obtainMessage(5);//标识what用于massage
                 //msg.what = 5;
                 msg.obj = bundle;//编辑msg内容

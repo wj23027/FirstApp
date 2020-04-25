@@ -30,6 +30,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class RateActivity extends AppCompatActivity implements Runnable {
     public final String TAG = "RateActivity";
@@ -39,12 +42,14 @@ public class RateActivity extends AppCompatActivity implements Runnable {
     float dollarRate;
     float euroRate;
     float wonRate;
+    String updateDate="";
 
     @SuppressLint("HandlerLeak")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rate);
+
         //获得用户输入控件
         rmb = findViewById(R.id.rmb);
         show = findViewById(R.id.showOut);
@@ -55,13 +60,30 @@ public class RateActivity extends AppCompatActivity implements Runnable {
         dollarRate = sp.getFloat("dollar_rate",0.0f);
         euroRate = sp.getFloat("euro_rate",0.0f);
         wonRate = sp.getFloat("won_rate",0.0f);
+        updateDate = sp.getString("update_date","");
+
+        //获取当期系统时间
+        Date today = Calendar.getInstance().getTime();
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        final String todayStr = sdf.format(today);
+
         Log.i(TAG,"dollar:"+dollarRate);
         Log.i(TAG,"euro:"+euroRate);
         Log.i(TAG,"won:"+wonRate);
+        Log.i(TAG,"updateDate:"+updateDate);
+        Log.i(TAG,"todayString:"+todayStr);
 
-        //开启子线程
-        Thread t = new Thread(this);
-        t.start();
+        //判断是否更新
+        if(!todayStr.equals(updateDate)){
+            //开启子线程
+            Thread t = new Thread(this);
+            t.start();
+            Log.i(TAG,"需要更新");
+        }else{
+            Log.i(TAG,"不需要更新");
+        }
+
+
 
         handler = new Handler(){//用于获取其他线程中的消息
             @Override
@@ -74,6 +96,14 @@ public class RateActivity extends AppCompatActivity implements Runnable {
                     Log.i(TAG,"网页中的dollar:"+dollarRate);
                     Log.i(TAG,"网页中的euro:"+euroRate);
                     Log.i(TAG,"网页中的won:"+wonRate);
+
+                    //保存更新的日期
+                    SharedPreferences sp = getSharedPreferences("myrate",Activity.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putString("update_date",todayStr);
+                    Log.i(TAG,"已保存sp update_date:"+todayStr);
+                    editor.apply();
+
                     Toast.makeText(RateActivity.this,"汇率已更新",Toast.LENGTH_SHORT).show();
                 }
                 super.handleMessage(msg);
@@ -129,13 +159,17 @@ public class RateActivity extends AppCompatActivity implements Runnable {
         Log.i(TAG,"euro:"+euroRate);
         Log.i(TAG,"won:"+wonRate);
         //startActivity(config);
-
         startActivityForResult(config,1);
     }
 
     @Override//通过菜单下拉框打开新页面
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        onConfig();
+        if(item.getItemId() == R.id.menu_set){
+            onConfig();
+        }else if(item.getItemId() == R.id.rate_list){
+            Intent list = new Intent(this, MyListActivity.class);
+            startActivity(list);
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -170,7 +204,8 @@ public class RateActivity extends AppCompatActivity implements Runnable {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override//多线程
     public void run() {
-        Bundle bundle = new Bundle();//用于保存获取的汇率
+        Bundle bundle = getFromBOC(); ;//用于保存获取的汇率
+
 
 //        Log.i(TAG,"runrun");
 //        for (int i = 1;i<6;i++) {
@@ -183,12 +218,90 @@ public class RateActivity extends AppCompatActivity implements Runnable {
 //            }
 //        }
 
-//            //获取Msg对象，用于返回主线程
-//            Message msg = handler.obtainMessage(5);//标识what用于massage
-//            //msg.what = 5;
-//            msg.obj = "Hellow from run()";//编辑msg内容
-//            handler.sendMessage(msg);//将msg发送至消息队列
+            //获取Msg对象，用于返回主线程
+            Message msg = handler.obtainMessage(5);//标识what用于massage
+            //msg.what = 5;
+            msg.obj = bundle;//编辑msg内容
+            handler.sendMessage(msg);//将msg发送至消息队列
 
+
+        //bundle中通过massage保存数据
+        //获取Msg对象，用于返回主线程
+//        while(true){
+//            try {
+//                Thread.sleep(86400000);//使用sleep(long)方法定时刷新
+//                Message msg = handler.obtainMessage(5);//标识what用于massage
+//                //msg.what = 5;
+//                msg.obj = bundle;//编辑msg内容
+//                handler.sendMessage(msg);//将msg发送至消息队列
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+
+
+
+
+//        URL url = null;
+//        try {
+//            Log.i(TAG,"run:html=");
+//            url = new URL("http://www.usd-cny.com/bankofchina.htm");
+//            //利用HttpURLConnection打开远程链接
+//            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+//            InputStream inputStream = http.getInputStream();//获得页面的输入流
+//            String html = inputStringToString(inputStream);//解析数据流中的文本（从inputStream转为String
+//            Log.i(TAG,"run:html="+html);
+//        } catch (MalformedURLException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+
+    }
+
+
+/*
+获得网络数据到Bundle
+ */
+    private Bundle getFromBOC() {
+        Bundle bundle = new Bundle();
+        //获得网络数据
+        Document doc = null;
+        try {
+            doc = Jsoup.connect("https://www.boc.cn/sourcedb/whpj/").get();//从网页中获得doc对象
+            Log.i(TAG,"title:"+ doc.title());//获得body的title
+            Elements tables = doc.getElementsByTag("table");//在Document dot中获取所有table内的内容
+            Element table = tables.get(1);
+            //Log.i(TAG,"table="+table);
+            //在Element table获取td中的数据
+            Elements tds = table.getElementsByTag("td");
+            for(int i = 0;i<tds.size();i+=8){
+                String text = tds.get(i).text();
+                String value = tds.get(i + 5).text();
+                //Log.i(TAG, text+"===>"+ value);
+                if("美元".equals(text)){
+                    Log.i(TAG, text+"===>"+ 100f/Float.parseFloat(value));
+                    bundle.putFloat("dollar-rate",100f/Float.parseFloat(value));
+                }else if("欧元".equals(text)){
+                    Log.i(TAG, text+"===>"+ 100f/Float.parseFloat(value));
+                    bundle.putFloat("euro-rate",100f/Float.parseFloat(value));
+                }if("韩元".equals(text)){
+                    Log.i(TAG, text+"===>"+ 100f/Float.parseFloat(value));
+                    bundle.putFloat("won-rate",100f/Float.parseFloat(value));
+                }
+
+            }
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bundle;
+    }
+
+
+    private Bundle getFromUsdCny() {
+        Bundle bundle = new Bundle();
         //获得网络数据
         Document doc = null;
         try {
@@ -217,42 +330,10 @@ public class RateActivity extends AppCompatActivity implements Runnable {
             }
         }catch (IOException e) {
             e.printStackTrace();
-            }
-        //bundle中通过massage保存数据
-        //获取Msg对象，用于返回主线程
-        while(true){
-            try {
-                Thread.sleep(86400000);//使用sleep(long)方法定时刷新
-                Message msg = handler.obtainMessage(5);//标识what用于massage
-                //msg.what = 5;
-                msg.obj = bundle;//编辑msg内容
-                handler.sendMessage(msg);//将msg发送至消息队列
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
         }
-
-
-
-
-//        URL url = null;
-//        try {
-//            Log.i(TAG,"run:html=");
-//            url = new URL("http://www.usd-cny.com/bankofchina.htm");
-//            //利用HttpURLConnection打开远程链接
-//            HttpURLConnection http = (HttpURLConnection) url.openConnection();
-//            InputStream inputStream = http.getInputStream();//获得页面的输入流
-//            String html = inputStringToString(inputStream);//解析数据流中的文本（从inputStream转为String
-//            Log.i(TAG,"run:html="+html);
-//        } catch (MalformedURLException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-
+        return bundle;
     }
+
 
     //将输入流转化为字符串(可到网上查找方法）
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)

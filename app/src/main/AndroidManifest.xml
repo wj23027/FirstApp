@@ -15,7 +15,10 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
-        <activity android:name=".MyListActivity"></activity>
+        <activity android:name=".RateCatculateActivity"></activity>
+        <activity android:name=".MyAdapter" />
+        <activity android:name=".MyList2Activity" />
+        <activity android:name=".MyListActivity" />
         <activity android:name=".RateList" />
         <activity android:name=".ConfigActivity" />
         <activity

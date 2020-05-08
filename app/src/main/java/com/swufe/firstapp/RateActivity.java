@@ -167,7 +167,7 @@ public class RateActivity extends AppCompatActivity implements Runnable {
         if(item.getItemId() == R.id.menu_set){
             onConfig();
         }else if(item.getItemId() == R.id.rate_list){
-            Intent list = new Intent(this, MyListActivity.class);
+            Intent list = new Intent(this, MyList2Activity.class);
             startActivity(list);
         }
         return super.onOptionsItemSelected(item);

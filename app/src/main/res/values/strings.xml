@@ -21,6 +21,10 @@
     <string name="btn_won">Won</string>
     <string name="btn_open">config</string>
     <string name="btn_sava">sava</string>
+    <string name="title_activity_my_list2">MyList2Activity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 
 
     \

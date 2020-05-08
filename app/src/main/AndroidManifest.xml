@@ -15,7 +15,17 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
-        <activity android:name=".RateCatculateActivity"></activity>
+        <activity android:name=".testListActivity"></activity>
+        <activity
+            android:name=".TestActivity"
+            android:label="学院公告查询">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".RateCatculateActivity" />
         <activity android:name=".MyAdapter" />
         <activity android:name=".MyList2Activity" />
         <activity android:name=".MyListActivity" />
@@ -24,11 +34,7 @@
         <activity
             android:name=".RateActivity"
             android:label="Rate">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".ScoreActivity"

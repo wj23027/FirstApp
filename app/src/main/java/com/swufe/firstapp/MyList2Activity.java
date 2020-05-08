@@ -62,7 +62,6 @@ public class MyList2Activity extends ListActivity implements Runnable, AdapterVi
                 super.handleMessage(msg);
             }
         };
-
         getListView().setOnItemClickListener(this);
     }
 

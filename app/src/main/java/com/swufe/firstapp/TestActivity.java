@@ -111,13 +111,13 @@ public class TestActivity extends AppCompatActivity implements Runnable {
         //判断是否开启子线程
         Log.i(TAG,"onCreate:当期日期："+sdf.format(today.getTime()));
         Log.i(TAG,"onCreate:下次更新日期："+sdf.format(reset_date.getTime()));
-//        if(!reset_date.after(today)){
+        if(!reset_date.after(today)){
             Thread t = new Thread(this);
             t.start();
             Log.i(TAG,"onCreate:满足更新时间，打开子线程");
-//        }else{
-//            Log.i(TAG,"onCreate:未达更新时间，不打开子线程");
-//        }
+        }else{
+            Log.i(TAG,"onCreate:未达更新时间，不打开子线程");
+        }
 
         handler = new Handler(){//用于获取其他线程中的消息
             @Override

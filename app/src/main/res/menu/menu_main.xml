@@ -12,5 +12,10 @@
         android:icon="@mipmap/settings"
         android:title="rate_list"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/database"
+        android:icon="@mipmap/settings"
+        android:title="database"
+        app:showAsAction="never" />
 
 </menu>

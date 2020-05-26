@@ -1,7 +1,9 @@
 package com.swufe.firstapp;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,12 +26,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MyList2Activity extends ListActivity implements Runnable, AdapterView.OnItemClickListener
+public class MyList2Activity extends ListActivity implements Runnable, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener
 {
 
     private String TAG = "MyList2Activity";
     Handler handler;
-    ArrayList<HashMap<String, String>> listItems;
+    List<HashMap<String, String>> listItems;
     private SimpleAdapter listItemAdapter;
     private int msgwhat = 7;
 
@@ -49,9 +51,9 @@ public class MyList2Activity extends ListActivity implements Runnable, AdapterVi
             @Override
             public void handleMessage(@NonNull Message msg) {//获得数据队列
                 if(msg.what == msgwhat){//判断数据是哪个线程返回的
-                    List<HashMap<String,String>> retList = (List<HashMap<String, String>>) msg.obj;
+                    listItems = (List<HashMap<String, String>>) msg.obj;
                     //生成适配器的Item和动态数组对应的元素
-                    listItemAdapter= new SimpleAdapter(MyList2Activity.this, retList,//数据源
+                    listItemAdapter= new SimpleAdapter(MyList2Activity.this, listItems,//数据源
                             R.layout.list_item,//布局实现
                             new String[] {"ItemTitle","ItemDetail"},
                             new int[]{R.id.itemTitle,R.id.itemDetail}
@@ -63,6 +65,7 @@ public class MyList2Activity extends ListActivity implements Runnable, AdapterVi
             }
         };
         getListView().setOnItemClickListener(this);
+        getListView().setOnItemLongClickListener(this);
     }
 
     private void  initListView(){//初始化静态数据
@@ -148,5 +151,25 @@ public class MyList2Activity extends ListActivity implements Runnable, AdapterVi
         startActivity(rateCalc);
 
 
+    }
+
+    @Override
+    //长按删除操作
+    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+        Log.i(TAG,"onItemLongClick:长按列表项="+view);
+        //弹出确认对话框
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("提示").setMessage("请确认是否删除当前数据")
+                .setPositiveButton("是", new DialogInterface.OnClickListener() {//匿名类对象监听对话框是/否
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.i(TAG,"onItemLongClick:onClick:对话框处理：是");
+                listItems.remove(position);
+                listItemAdapter.notifyDataSetChanged();
+            }
+        })
+            .setNegativeButton("否",null);
+        dialog.create().show();
+        return true;
     }
 }

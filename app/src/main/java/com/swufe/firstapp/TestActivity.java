@@ -62,41 +62,17 @@ public class TestActivity extends AppCompatActivity implements Runnable {
 
         editText = findViewById(R.id.input);
         listView = findViewById(R.id.textListView);
-
-        //获取SP中的数据
-        SharedPreferences sp = getSharedPreferences("mydata", Activity.MODE_PRIVATE);
-        String data = sp.getString("data", "");
-        String update_calendarStr = sp.getString("update_calendar","");
-        Gson gson = new Gson();
-        Type listType = new TypeToken<List<HashMap<String,String>>>() {
-        }.getType();
-        list = gson.fromJson(data, listType);
-        Log.i(TAG,"onCreate:SharedPreferences:已获取sp保存的list数据");
-
-
-        //初始化ListView
-        List<HashMap<String,String>> initList = new ArrayList<HashMap<String,String>>();
-        ListView listView = findViewById(R.id.textListView);
-        for(int i = 0;i <10 ; i++){
-            HashMap<String,String>map = new HashMap<String,String>();//初始化Map
-            map.put("title","title："+i);
-            map.put("href","href："+i);
-            initList.add(map);
-        }
-        //生成适配器的Item和动态数组对应的元素
-        listItemAdapter = new SimpleAdapter(this, initList,//数据源
-                R.layout.list_item,//布局实现
-                new String[] {"ItemTitle","ItemDetail"},
-                new int[]{R.id.itemTitle,R.id.itemDetail});
-        Log.i(TAG,"onCreate:initList:已初始化listView");
-
-
-
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
         //获取当期系统时间
         Calendar calendar = Calendar.getInstance();
         Date today = calendar.getTime();
+
         //计算下次更新时间
+        //获取SP中的日期
+        SharedPreferences sp = getSharedPreferences("mydata", Activity.MODE_PRIVATE);
+        String update_calendarStr = sp.getString("update_calendar","");
+        Log.i(TAG,"onCreate:SharedPreferences:获取上次更新日期");
         Date update_day = new Date();
         try {
             update_day = sdf.parse(update_calendarStr);
@@ -109,15 +85,17 @@ public class TestActivity extends AppCompatActivity implements Runnable {
         update_cal.add(Calendar.DATE,7);
         Date reset_date = update_cal.getTime();
         //判断是否开启子线程
-        Log.i(TAG,"onCreate:当期日期："+sdf.format(today.getTime()));
+        Log.i(TAG,"onCreate:当前日期："+sdf.format(today.getTime()));
         Log.i(TAG,"onCreate:下次更新日期："+sdf.format(reset_date.getTime()));
-        if(!reset_date.after(today)){
+
+        if(!reset_date.before(today)){
             Thread t = new Thread(this);
             t.start();
             Log.i(TAG,"onCreate:满足更新时间，打开子线程");
         }else{
             Log.i(TAG,"onCreate:未达更新时间，不打开子线程");
         }
+
 
         handler = new Handler(){//用于获取其他线程中的消息
             @Override
@@ -127,16 +105,7 @@ public class TestActivity extends AppCompatActivity implements Runnable {
                     Log.i(TAG,"onCreate:handler:获得数据队列中的list数据");
                 }
                 super.handleMessage(msg);
-
-                listItemAdapter= new SimpleAdapter(TestActivity.this, list,//数据源
-                        R.layout.activity_test_list,//布局实现
-                        new String[] {"title","href"},
-                        new int[]{R.id.testTitle,R.id.testURL}
-                );
-                listView.setAdapter(listItemAdapter);
-                Log.i(TAG,"onCreate:handler:利用list数据重置listView");
-
-
+                //保存list数据及更新日期
                 SharedPreferences sp = getSharedPreferences("mydata", Activity.MODE_PRIVATE);
                 Gson gson = new Gson();
                 String json = gson.toJson(list);
@@ -145,11 +114,25 @@ public class TestActivity extends AppCompatActivity implements Runnable {
                 //保存更新的日期
                 editor.putString("update_calendar",sdf.format(calendar.getTime()));
                 editor.apply();
-                Log.i(TAG,"onCreate:handler:SharedPreferences:已保存list数据及更新日期:"+sdf.format(calendar.getTime()));
-
-
+                Log.i(TAG,"onCreate:handler:SharedPreferences:已更新list数据并保存更新日期:"+sdf.format(calendar.getTime()));
             }
         };
+
+        //获取sp保存的list数据
+        String data = sp.getString("data", "");
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<HashMap<String,String>>>() {
+                        }.getType();
+        list = gson.fromJson(data, listType);
+        Log.i(TAG,"onCreate:SharedPreferences:已获取sp保存的list数据");
+        //在布局中展示list数据
+        listItemAdapter= new SimpleAdapter(TestActivity.this, list,//数据源
+                R.layout.activity_test_list,//布局实现
+                new String[] {"title","time","href"},
+                new int[]{R.id.testTitle,R.id.testDate,R.id.testURL}
+        );
+        listView.setAdapter(listItemAdapter);
+        Log.i(TAG,"onCreate:利用list数据重置listView");
 
 
         editText.addTextChangedListener(new TextWatcher() {//匿名对象监听
@@ -171,6 +154,7 @@ public class TestActivity extends AppCompatActivity implements Runnable {
                     if (title.contains(input)){
                         HashMap<String,String>  map2 = new HashMap<String,String>();
                         map2.put("href",map.get("href"));
+                        map2.put("time",map.get("time"));
                         map2.put("title",title);
                         listViews.add(map2);
                         Log.i(TAG,"onCreate:editText:afterTextChanged:标题:"+title);
@@ -179,14 +163,15 @@ public class TestActivity extends AppCompatActivity implements Runnable {
                 }
                 if (!b){
                     Log.i(TAG,"onCreate:editText:afterTextChanged:没有查询到相关公告");
+                    listView.setEmptyView(findViewById(R.id.empty));
                     Toast.makeText(TestActivity.this,"没有查询到相关公告",Toast.LENGTH_LONG).show();
                 }
 
                 //展示查询结果
                 listItemAdapter= new SimpleAdapter(TestActivity.this, listViews,//数据源
                         R.layout.activity_test_list,//布局实现
-                        new String[] {"title","href"},
-                        new int[]{R.id.testTitle,R.id.testURL}
+                        new String[] {"title","time","href"},
+                        new int[]{R.id.testTitle,R.id.testDate,R.id.testURL}
                 );
                 listView.setAdapter(listItemAdapter);
                 Log.i(TAG,"onCreate:editText:afterTextChanged:已在listView展示查询结果");
@@ -205,7 +190,7 @@ public class TestActivity extends AppCompatActivity implements Runnable {
                 Log.i(TAG,"onCreate:listView:onItemClick:点击标题："+titleStr);
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(hrefStr));
                 startActivity(intent);
-                Log.i(TAG,"onCreate:listView:onItemClick:正在打卡链接："+hrefStr);
+                Log.i(TAG,"onCreate:listView:onItemClick:正在打开链接："+hrefStr);
             }
         });
     }
@@ -227,12 +212,15 @@ public class TestActivity extends AppCompatActivity implements Runnable {
             for(int i = 0;i<as.size();i++){
                 Elements spans = as.get(i).getElementsByTag("span");
                 String title = spans.get(0).text();
+                String time = spans.get(1).text();
                 Log.i(TAG, "run:title:"+ title);
+                Log.i(TAG, "run:time:"+ time);
                 String href = "https://it.swufe.edu.cn/"+as.get(i).attr("href");
                 Log.i(TAG, "run:href:"+ href);
 
                 HashMap<String,String>  map = new HashMap<String,String>();
                 map.put("href",href);
+                map.put("time",time);
                 map.put("title",title);
                 itemList.add(map);
             }

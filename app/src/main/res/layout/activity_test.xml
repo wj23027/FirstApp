@@ -11,12 +11,26 @@
         android:id="@+id/input"
         android:textSize="28sp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:autofillHints="请输入关键词" />
+
 
     <ListView
         android:id="@+id/textListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content" >
+    </ListView>
+
+
+
+
+    <TextView
+        android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:textSize="40sp"
+        android:text="no data" />
 
 
 </LinearLayout>

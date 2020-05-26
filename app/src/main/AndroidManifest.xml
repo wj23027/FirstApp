@@ -18,9 +18,11 @@
         <activity
             android:name=".TestActivity"
             android:label="学院公告查询">
+
         </activity>
         <activity
             android:name=".RateCatculateActivity"
+            android:theme="@style/Theme.AppCompat.Dialog.MinWidth"
             android:label="RateCatculate">
         </activity>
         <activity
